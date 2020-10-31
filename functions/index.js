@@ -6,6 +6,7 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 
 const firestore = admin.firestore();
+const auth = admin.auth();
 
 exports.checkPhoneNoDuplication = functions.https.onRequest(async (req, res) => {
     const data = req.body;
@@ -21,5 +22,15 @@ exports.checkPhoneNoDuplication = functions.https.onRequest(async (req, res) => 
         }
     } catch(e) {
         res.send({ isExist: false }).status(404);
+    }
+});
+
+exports.deleteUser = functions.https.onRequest(async (req, res) => {
+    const data = req.body;
+    try {
+        await auth.deleteUser(data.uid);
+        res.send({isDeleted: true, error: false, errorObj: {}});
+    } catch (e) {
+        res.send({isDeleted: false, error: true, errorObj: e});
     }
 });
