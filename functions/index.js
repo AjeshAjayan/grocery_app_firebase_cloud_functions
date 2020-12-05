@@ -1,3 +1,7 @@
+const express = require('express');
+const app = express();
+const cors = require('cors');
+
 // The Cloud Functions for Firebase SDK to create Cloud Functions and setup triggers.
 const functions = require('firebase-functions');
 
@@ -7,6 +11,11 @@ admin.initializeApp();
 
 const firestore = admin.firestore();
 const auth = admin.auth();
+
+const sendMailRouter = require('./routes/send-mail');
+
+// middle wares
+app.use(cors({origin: true}));
 
 exports.checkPhoneNoDuplication = functions.https.onRequest(async (req, res) => {
     const data = req.body;
@@ -25,7 +34,7 @@ exports.checkPhoneNoDuplication = functions.https.onRequest(async (req, res) => 
     }
 });
 
-exports.deleteUser = functions.https.onRequest(async (req, res) => {
+app.post('/deleteUser',async (req, res) => {
     const data = req.body;
     try {
         await auth.deleteUser(data.uid);
@@ -34,3 +43,8 @@ exports.deleteUser = functions.https.onRequest(async (req, res) => {
         res.send({isDeleted: false, error: true, errorObj: e});
     }
 });
+
+// send mail
+app.use('/send-mail', sendMailRouter);
+
+exports.widgets = functions.https.onRequest(app);
